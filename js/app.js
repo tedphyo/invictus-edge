@@ -36,9 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let chartTimer = null;
     let quoteRefreshTimer = null;
     let tvRefreshTimer = null;
+    let watchlistRefreshTimer = null;
+    let retryTimer = null;
     let isPaused = false;
     let tradingViewWidget = null;
     let chartInterval = '15m';
+    let lastSuccessTime = Date.now();
+    let refreshFailCount = 0;
 
     const INTERVAL_MAP = {
         '1m': { tv: '1', api: '1m' },
@@ -71,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusDot.style.backgroundColor = '#4caf50';
             return data;
         } catch (error) {
-            console.error('API Request Failed:', error);
+            console.warn('API Request Failed:', error.message || error);
             statusIndicator.textContent = 'Offline';
             statusDot.style.backgroundColor = '#f59e0b';
             return { _source: 'unavailable', _error: 'Backend offline' };
@@ -146,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Watchlist Panel ──
     const WATCHLIST_SYMBOLS = ['SPY', 'QQQ', 'NVDA', 'AAPL', 'TSLA', 'MSFT'];
     let watchlistData = [];
-    let watchlistRefreshTimer = null;
 
     async function fetchWatchlist() {
         const symbolsParam = WATCHLIST_SYMBOLS.join(',');
@@ -269,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderNumerologyDashboard(currentCalculations);
             updateSignalBanner(currentCalculations.signal.value);
         } catch (error) {
-            console.error('Error calculating numerology:', error);
+            console.error('Numerology calculation failed:', error);
             numerologyContainer.innerHTML = `<div class="numerology-unavailable"><div class="card-title">Numerology</div><div class="unavailable-label">Cycle calculation unavailable</div></div>`;
         }
     }
@@ -457,11 +460,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!lastUpdatedEl) return;
         const now = new Date();
         const ts = now.toLocaleTimeString('en-US', { hour12: false });
-        lastUpdatedEl.textContent = `Last updated: ${ts}`;
-        lastUpdatedEl.className = 'last-updated-badge fresh';
+        const secondsSinceSuccess = (Date.now() - lastSuccessTime) / 1000;
+        let badgeClass = 'last-updated-badge';
         if (document.hidden) {
-            lastUpdatedEl.className = 'last-updated-badge paused';
+            badgeClass += ' paused';
+        } else if (secondsSinceSuccess > 45) {
+            badgeClass += ' stale';
+        } else {
+            badgeClass += ' fresh';
         }
+        lastUpdatedEl.textContent = `Last updated: ${ts}`;
+        lastUpdatedEl.className = badgeClass;
     }
 
     // ── Refresh intervals ──
@@ -469,11 +478,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.hidden || isPaused) return;
         try {
             await fetchMarketData(selectedSymbol);
+            lastSuccessTime = Date.now();
+            refreshFailCount = 0;
             updateLastUpdated();
+            if (retryTimer) {
+                clearTimeout(retryTimer);
+                retryTimer = null;
+            }
         } catch (e) {
             console.warn('Quote refresh failed:', e);
+            refreshFailCount++;
             if (lastUpdatedEl) {
                 lastUpdatedEl.className = 'last-updated-badge stale';
+            }
+            if (refreshFailCount < 3) { // Retry quickly for up to 3 times
+                if (retryTimer) clearTimeout(retryTimer);
+                retryTimer = setTimeout(refreshQuoteData, 5 * 1000); // 5-second retry
             }
         }
     }
@@ -481,6 +501,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function refreshTradingView() {
         if (document.hidden || isPaused) return;
         renderTradingViewWidget(chartSymbol);
+    }
+
+    async function refreshWatchlistData() {
+        if (document.hidden || isPaused) return;
+        try {
+            await fetchWatchlist();
+        } catch (e) {
+            console.warn('Watchlist refresh failed:', e);
+        }
     }
 
     function selectSymbol(symbol) {
@@ -498,10 +527,10 @@ document.addEventListener('DOMContentLoaded', () => {
             newOption.value = symbol;
             newOption.textContent = symbol;
             symbolSelect.insertBefore(newOption, symbolSelect.options[symbolSelect.options.length - 1]);
-            symbolSelect.value = symbol;
         }
+        symbolSelect.value = symbol;
         saveState();
-        fetchMarketData(selectedSymbol);
+        refreshQuoteData();
         loadChart(symbol);
     }
 
@@ -532,10 +561,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const interval = btn.dataset.chartInterval;
         chartInterval = interval;
         document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.toggle('active', b.dataset.chartInterval === interval));
-        renderTradingViewWidget(chartSymbol);
+        refreshTradingView();
     }));
 
-    window.addEventListener('resize', () => { if (tradingViewContainer && !tradingViewContainer.children.length) renderTradingViewWidget(chartSymbol); });
+    window.addEventListener('resize', () => { if (tradingViewContainer && !tradingViewContainer.children.length) refreshTradingView(); });
     datePicker.addEventListener('change', (event) => {
         fetchAndRenderNumerology(event.target.value, selectedSymbol, selectedFoundationDate);
     });
@@ -543,33 +572,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Visibility change — pause when tab hidden ──
     document.addEventListener('visibilitychange', () => {
         isPaused = document.hidden;
-        if (lastUpdatedEl) {
-            lastUpdatedEl.className = isPaused ? 'last-updated-badge paused' : 'last-updated-badge fresh';
+        updateLastUpdated();
+        if (!isPaused) {
+            refreshQuoteData(); // Refresh immediately when tab becomes visible
+            refreshWatchlistData();
+            // TradingView widget handles its own refresh on becoming visible
         }
     });
 
     datePicker.value = new Date().toISOString().split('T')[0];
-    Promise.all([makeRequest(`/api/symbol-meta?symbol=SPY`), makeRequest(`/api/symbol-meta?symbol=QQQ`)]).then(([spyMeta, qqqMeta]) => {
+    Promise.all([makeRequest('/api/symbol-meta?symbol=SPY'), makeRequest('/api/symbol-meta?symbol=QQQ')]).then(([spyMeta, qqqMeta]) => {
         if (spyMeta && spyMeta.foundationDate) spyFoundationDate = spyMeta.foundationDate;
         if (qqqMeta && qqqMeta.foundationDate) qqqFoundationDate = qqqMeta.foundationDate;
         selectSymbol(selectedSymbol);
-        if (selectedSymbol !== 'QQQ') fetchMarketData('QQQ');
-        else fetchMarketData('SPY');
+        if (selectedSymbol !== 'QQQ') refreshQuoteData(); // Initial load for selectedSymbol, then QQQ
+        if (selectedSymbol !== 'SPY') refreshQuoteData(); // Initial load for selectedSymbol, then SPY
     }).catch(error => {
-        console.error('Error fetching initial foundation dates:', error);
-        selectSymbol(selectedSymbol);
-        fetchMarketData('QQQ');
+        console.warn('Error fetching initial foundation dates:', error);
+        selectSymbol(selectedSymbol); // Still try to select symbol even if meta fails
     });
 
     // ── Auto-refresh timers ──
-    chartTimer = setInterval(() => loadChart(chartSymbol), 60 * 1000);
-    quoteRefreshTimer = setInterval(refreshQuoteData, 45 * 1000);
-    tvRefreshTimer = setInterval(refreshTradingView, 60 * 1000);
-    watchlistRefreshTimer = setInterval(() => { if (!document.hidden && !isPaused) { fetchWatchlist(); } }, 45 * 1000);
+    chartTimer = setInterval(() => { if (!document.hidden && !isPaused) loadChart(chartSymbol); }, 30 * 1000); // Chart every 30s
+    quoteRefreshTimer = setInterval(refreshQuoteData, 30 * 1000); // Market data every 30s
+    tvRefreshTimer = setInterval(refreshTradingView, 120 * 1000); // TradingView iframe every 2 min to prevent flashes
+    watchlistRefreshTimer = setInterval(refreshWatchlistData, 30 * 1000); // Watchlist every 30s
 
     // ── Show initial timestamp ──
     updateLastUpdated();
 
     // ── Initial watchlist fetch ──
-    fetchWatchlist();
+    refreshWatchlistData();
 });

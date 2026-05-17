@@ -1,50 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
-  <defs>
-    <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a237e"/>
-      <stop offset="100%" style="stop-color:#0d1b2a"/>
-    </linearGradient>
-    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffd700"/>
-      <stop offset="100%" style="stop-color:#ffab00"/>
-    </linearGradient>
-    <linearGradient id="accent-blue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2979ff"/>
-      <stop offset="100%" style="stop-color:#00b0ff"/>
-    </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  <!-- Shield shape -->
-  <path d="M200 30 L340 90 L340 200 C340 290 200 370 200 370 C200 370 60 290 60 200 L60 90 Z"
-        fill="url(#shield-grad)" stroke="url(#accent-grad)" stroke-width="4"/>
-  <!-- Inner shield border -->
-  <path d="M200 55 L315 105 L315 195 C315 270 200 340 200 340 C200 340 85 270 85 195 L85 105 Z"
-        fill="none" stroke="url(#accent-blue)" stroke-width="1.5" opacity="0.6"/>
-  <!-- IE letters -->
-  <text x="200" y="175" text-anchor="middle" dominant-baseline="central"
-        font-family="Georgia, serif" font-size="100" font-weight="bold" fill="url(#accent-grad)" filter="url(#glow)">IE</text>
-  <!-- Candle motif - left -->
-  <rect x="150" y="240" width="6" height="50" rx="2" fill="url(#accent-blue)" opacity="0.8"/>
-  <rect x="150" y="235" width="6" height="8" rx="1" fill="#ff6d00"/>
-  <line x1="153" y1="235" x2="153" y2="225" stroke="#ff6d00" stroke-width="2"/>
-  <circle cx="153" cy="224" r="2" fill="#ffab00" filter="url(#glow)"/>
-  <!-- Candle motif - middle -->
-  <rect x="197" y="225" width="6" height="65" rx="2" fill="url(#accent-grad)" opacity="0.9"/>
-  <rect x="197" y="220" width="6" height="8" rx="1" fill="#ff6d00"/>
-  <line x1="200" y1="220" x2="200" y2="210" stroke="#ff6d00" stroke-width="2"/>
-  <circle cx="200" cy="209" r="2" fill="#ffab00" filter="url(#glow)"/>
-  <!-- Candle motif - right -->
-  <rect x="244" y="248" width="6" height="42" rx="2" fill="url(#accent-blue)" opacity="0.8"/>
-  <rect x="244" y="243" width="6" height="8" rx="1" fill="#ff6d00"/>
-  <line x1="247" y1="243" x2="247" y2="233" stroke="#ff6d00" stroke-width="2"/>
-  <circle cx="247" cy="232" r="2" fill="#ffab00" filter="url(#glow)"/>
-  <!-- Bottom accent line -->
-  <line x1="120" y1="310" x2="280" y2="310" stroke="url(#accent-grad)" stroke-width="2" opacity="0.5"/>
-  <!-- Small stars -->
-  <circle cx="130" cy="115" r="2" fill="#ffd700" opacity="0.6"/>
-  <circle cx="270" cy="115" r="2" fill="#ffd700" opacity="0.6"/>
-  <circle cx="200" y="105" r="1.5" fill="#ffd700" opacity="0.4"/>
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" fill="#0D1B2A"/>
+  <path d="M20 5L10 15V25L20 35L30 25V15L20 5Z" fill="#1A237E"/>
+  <path d="M20 8L12 16V24L20 32L28 24V16L20 8Z" stroke="#FFD700" stroke-width="2"/>
+  <path d="M16 18L18 18L18 22L16 22L16 18Z" fill="#FFD700"/>
+  <path d="M22 18L24 18L24 22L22 22L22 18Z" fill="#FFD700"/>
+  <path d="M19 16L21 16L21 18L19 18L19 16Z" fill="#4B0082"/> /* Dark blue/indigo for top candle wick */
+  <path d="M19 22L21 22L21 24L19 24L19 22Z" fill="#4B0082"/> /* Dark blue/indigo for bottom candle wick */
 </svg>
