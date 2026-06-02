@@ -1,9 +1,8 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="40" height="40" fill="#0D1B2A"/>
-  <path d="M20 5L10 15V25L20 35L30 25V15L20 5Z" fill="#1A237E"/>
+  <path d="M20 5L10 15V25L20 35L30 25V15L20 5Z" fill="#4C2889"/>
   <path d="M20 8L12 16V24L20 32L28 24V16L20 8Z" stroke="#FFD700" stroke-width="2"/>
   <path d="M16 18L18 18L18 22L16 22L16 18Z" fill="#FFD700"/>
   <path d="M22 18L24 18L24 22L22 22L22 18Z" fill="#FFD700"/>
-  <path d="M19 16L21 16L21 18L19 18L19 16Z" fill="#4B0082"/> /* Dark blue/indigo for top candle wick */
-  <path d="M19 22L21 22L21 24L19 24L19 22Z" fill="#4B0082"/> /* Dark blue/indigo for bottom candle wick */
+  <path d="M19 16L21 16L21 18L19 18L19 16Z" fill="#B794FF"/>
+  <path d="M19 22L21 22L21 24L19 24L19 22Z" fill="#B794FF"/>
 </svg>

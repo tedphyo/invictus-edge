@@ -325,8 +325,10 @@ document.addEventListener("DOMContentLoaded", () => {
             card.className = `watchlist-card${chartSymbol === sym ? " active" : ""}${unavailable ? " unavailable" : ""}`;
             card.innerHTML = `
                 <span class="wl-symbol">${sym}</span>
-                <span class="wl-price">${unavailable ? "--" : "$" + price}</span>
-                <span class="wl-change ${unavailable ? "offline" : (change >= 0 ? "positive" : "negative")}">${unavailable ? "Offline" : changeStr + " (" + pctStr + ")"}</span>
+                <span class="wl-right">
+                    <span class="wl-price">${unavailable ? "--" : "$" + price}</span>
+                    <span class="wl-change ${unavailable ? "offline" : (change >= 0 ? "positive" : "negative")}">${unavailable ? "Offline" : changeStr + " (" + pctStr + ")"}</span>
+                </span>
                 <span class="wl-num-dot ${aligned ? "aligned" : "not-aligned"}" title="${aligned ? "Numerologically aligned" : "Not aligned"}"></span>
             `;
             card.addEventListener("click", () => {

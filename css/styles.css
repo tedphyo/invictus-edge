@@ -816,9 +816,10 @@ nav a.active { color: var(--gold-light); }
 }
 .watchlist-card:hover { border-color: var(--purple-light); transform: translateX(2px); }
 .watchlist-card.active { border-color: rgba(212, 175, 55, 0.55); background: rgba(212, 175, 55, 0.07); }
-.wl-symbol { font-weight: 700; font-size: 0.85rem; color: var(--text); min-width: 50px; }
-.wl-price { font-family: var(--mono); font-size: 0.8rem; color: var(--text-soft); flex: 1; text-align: right; }
-.wl-change { font-family: var(--mono); font-size: 0.72rem; min-width: 56px; text-align: right; }
+.wl-symbol { font-weight: 700; font-size: 0.85rem; color: var(--text); min-width: 42px; flex-shrink: 0; }
+.wl-right { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.wl-price { font-family: var(--mono); font-size: 0.82rem; color: var(--text-soft); line-height: 1.25; }
+.wl-change { font-family: var(--mono); font-size: 0.7rem; white-space: nowrap; line-height: 1.25; }
 .wl-change.positive { color: var(--green); }
 .wl-change.negative { color: var(--red); }
 .wl-change.offline { color: var(--faint); font-style: italic; font-size: 0.68rem; }
