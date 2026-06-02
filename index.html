@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invictus Edge — Signals. Cycles. Conviction.</title>
+  <meta name="description" content="Invictus Edge — an imperial market-timing research dashboard pairing numerology cycle context with live market data.">
   <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -26,21 +30,57 @@
       </nav>
     </div>
   </header>
+
   <section class="hero">
     <div class="hero-badge">Numerology &middot; Market Timing</div>
-    <h1>Signals. Cycles. Conviction.</h1>
-    <p>Invictus Edge is a public-safe market timing research dashboard. Track cycle scores, watch SPY/QQQ context, and keep conviction disciplined.</p>
+    <h1>Signals. Cycles.<br><span class="accent">Conviction.</span></h1>
+    <p>An imperial market-timing research dashboard. Read the day's cycle scores, track live SPY / QQQ / DIA context, and keep your conviction disciplined.</p>
+    <div class="hero-cta">
+      <a href="#calculator" class="btn btn-gold">Open the Dashboard</a>
+      <a href="#market" class="btn btn-ghost">Live Market Intel</a>
+    </div>
   </section>
+
+  <section class="pillars">
+    <div class="container">
+      <div class="pillars-grid">
+        <div class="pillar reveal">
+          <div class="pillar-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 20h20L12 2Z"/><circle cx="12" cy="14" r="3"/></svg>
+          </div>
+          <h3>Numerology Engine</h3>
+          <p>Universal &amp; personal day cycles, foundation readings, and energy specs — computed live in your browser.</p>
+        </div>
+        <div class="pillar reveal">
+          <div class="pillar-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 5-7 4 5"/><path d="M3 21h18"/></svg>
+          </div>
+          <h3>Live Market Pulse</h3>
+          <p>Real-time quotes for the major index ETFs and your watchlist, with a full TradingView chart on tap.</p>
+        </div>
+        <div class="pillar reveal">
+          <div class="pillar-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>
+          </div>
+          <h3>Cycle Signals</h3>
+          <p>Disciplined timing context that flags notable cycle days — always confirmed against price, never standalone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div class="container">
     <div class="disclaimer">
-      <strong>Disclaimer:</strong> Invictus Edge is an experimental research tool. Nothing on this site constitutes financial advice. Market data shown is for educational reference only. Past performance does not guarantee future results. Trade at your own risk.
+      <strong>Disclaimer:</strong> Invictus Edge is an experimental research tool. Nothing on this site constitutes financial advice. Market data is shown for educational reference only. Past performance does not guarantee future results. Trade at your own risk.
     </div>
   </div>
+
   <section id="calculator">
     <div class="container">
       <div class="section-header">
+        <div class="eyebrow">Cycle Dashboard</div>
         <h2>Numerology Dashboard</h2>
-        <p>Public-safe timing scores for research and planning</p>
+        <p>Public-safe timing scores for research and planning.</p>
       </div>
       <div class="dashboard-controls">
         <div>
@@ -70,37 +110,39 @@
       </div>
     </div>
   </section>
+
   <section id="market">
     <div class="container">
       <div class="section-header">
+        <div class="eyebrow">Live Market Intel</div>
         <h2>Market Intel</h2>
-        <p>Reference levels &mdash; for educational use only</p>
+        <p>Real-time index context &mdash; for educational use only.</p>
       </div>
       <div class="market-grid">
         <div class="market-card">
           <div class="symbol">SPY</div>
-          <div class="price" id="spy-price">---</div>
-          <div class="change" id="spy-change">---</div>
-          <div class="meta">Market bridge</div>
+          <div class="price" id="spy-price">&mdash;</div>
+          <div class="change" id="spy-change">&mdash;</div>
+          <div class="meta">S&amp;P 500 ETF</div>
         </div>
         <div class="market-card">
           <div class="symbol">QQQ</div>
-          <div class="price" id="qqq-price">---</div>
-          <div class="change" id="qqq-change">---</div>
-          <div class="meta">Market bridge</div>
+          <div class="price" id="qqq-price">&mdash;</div>
+          <div class="change" id="qqq-change">&mdash;</div>
+          <div class="meta">Nasdaq 100 ETF</div>
         </div>
         <div class="market-card">
-          <div class="symbol">VIX</div>
-          <div class="price">---</div>
-          <div class="change" id="vix-change">---</div>
-          <div class="meta">Reference: last known session</div>
+          <div class="symbol">DIA</div>
+          <div class="price" id="dia-price">&mdash;</div>
+          <div class="change" id="dia-change">&mdash;</div>
+          <div class="meta">Dow 30 ETF</div>
         </div>
       </div>
       <div class="live-chart-panel">
         <div class="chart-head">
           <div>
             <div class="chart-title">TradingView Advanced Chart</div>
-            <div class="meta" id="chart-source">TradingView widget + optional market-data breakdown</div>
+            <div class="meta" id="chart-source">Live TradingView chart + live-quote breakdown</div>
           </div>
           <div class="chart-tabs">
             <button class="chart-tab active" data-chart-symbol="SPY">SPY</button>
@@ -132,10 +174,10 @@
             <div class="breakdown-grid">
               <div class="breakdown-card"><strong>Symbol</strong><span id="bd-symbol">--</span></div>
               <div class="breakdown-card"><strong>Last</strong><span id="bd-last">--</span></div>
-              <div class="breakdown-card"><strong>Trend</strong><span id="bd-trend">--</span></div>
-              <div class="breakdown-card"><strong>Range</strong><span id="bd-range">--</span></div>
+              <div class="breakdown-card"><strong>Change</strong><span id="bd-change">--</span></div>
+              <div class="breakdown-card"><strong>Day Range</strong><span id="bd-range">--</span></div>
               <div class="breakdown-card"><strong>HOD / LOD</strong><span id="bd-hilo">--</span></div>
-              <div class="breakdown-card"><strong>Volume</strong><span id="bd-volume">--</span></div>
+              <div class="breakdown-card"><strong>Prev Close</strong><span id="bd-prevclose">--</span></div>
             </div>
           </div>
           <div class="watchlist-panel" id="watchlist-panel">
@@ -149,17 +191,19 @@
           </div>
         </div>
       </div>
-      <div class="market-notice">
-        <strong>Market data bridge is optional.</strong> When backend endpoints are unavailable, the app shows offline placeholders instead of fake prices.
-        <div><span id="last-updated" class="last-updated-badge"></span></div>
+      <div class="market-section-notice">
+        <span><strong>Live quotes</strong> refresh automatically every 30 seconds. Chart powered by TradingView.</span>
+        <span id="last-updated" class="last-updated-badge"></span>
       </div>
     </div>
   </section>
+
   <section id="signals">
     <div class="container">
       <div class="section-header">
+        <div class="eyebrow">Timing Context</div>
         <h2>Cycle Signals</h2>
-        <p>Cycle context for disciplined market review</p>
+        <p>Cycle context for disciplined market review.</p>
       </div>
       <div class="signal-panel">
         <h3>Today's Readings</h3>
@@ -180,15 +224,19 @@
             <div class="interpretation" id="sig-signal-int">No signal active</div>
           </div>
         </div>
-        <div style="margin-top:1rem;font-size:.8rem;color:#667799;text-align:center">
+        <div class="signal-footnote">
           <strong>Rule:</strong> cycle context only &middot; chart confirmation required
         </div>
       </div>
     </div>
   </section>
+
   <section id="about">
     <div class="container">
-      <div class="section-header"><h2>About Invictus Edge</h2></div>
+      <div class="section-header">
+        <div class="eyebrow">The Edge</div>
+        <h2>About Invictus Edge</h2>
+      </div>
       <div class="about-content">
         <p>Invictus Edge is an experimental research platform that applies cycle-based timing context to financial market analysis. It is not a trading signal service, and it does not provide financial advice.</p>
         <h3>Public Scope</h3>
@@ -198,12 +246,14 @@
       </div>
     </div>
   </section>
+
   <footer>
     <div class="container">
-      <p><strong>Invictus Edge</strong> &mdash; Signals. Cycles. Conviction.</p>
-      <p>Built for educational and experimental research. Nothing herein is financial advice.</p>
+      <p>Invictus Edge</p>
+      <p>Signals. Cycles. Conviction. &mdash; Built for educational and experimental research. Nothing herein is financial advice.</p>
     </div>
   </footer>
+
   <script src="js/numerology.js"></script>
   <script src="js/app.js"></script>
 </body>
