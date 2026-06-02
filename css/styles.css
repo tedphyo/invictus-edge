@@ -10,14 +10,14 @@
 
 /* ============================== VARIABLES ============================== */
 :root {
-  /* Base canvas */
-  --bg:            #0b0614;
-  --bg-2:          #130a24;
-  --surface:       rgba(30, 18, 56, 0.55);
-  --surface-solid: #18102e;
-  --card:          rgba(34, 21, 64, 0.58);
-  --card-solid:    #1d1338;
-  --inset:         #120a22;
+  /* Base canvas — deep navy-black, less flat purple */
+  --bg:            #07060f;
+  --bg-2:          #0d0b1d;
+  --surface:       rgba(26, 20, 50, 0.55);
+  --surface-solid: #161227;
+  --card:          rgba(30, 22, 58, 0.56);
+  --card-solid:    #1a1530;
+  --inset:         #0f0b1e;
 
   /* Lines */
   --border:        rgba(170, 142, 255, 0.16);
@@ -41,6 +41,10 @@
   --gold-light:    #f3d98b;
   --gold-deep:     #a9821f;
 
+  /* Electric accent — cyan + violet, used sparingly for glow/depth */
+  --cyan:          #22d3ee;
+  --electric:      #818cf8;
+
   /* Market */
   --green:         #34d399;
   --red:           #fb7185;
@@ -61,6 +65,7 @@
   --shadow:   0 18px 50px -22px rgba(8, 3, 20, 0.9);
   --glow-purple: 0 0 0 1px var(--border), 0 24px 60px -28px rgba(124, 58, 237, 0.55);
   --glow-gold:   0 0 0 1px rgba(212, 175, 55, 0.28), 0 20px 48px -26px rgba(212, 175, 55, 0.35);
+  --glow-cyan:   0 0 0 1px rgba(34, 211, 238, 0.22), 0 22px 54px -26px rgba(34, 211, 238, 0.30);
 
   --maxw: 1180px;
 }
@@ -68,7 +73,17 @@
 /* ============================== RESET / BASE ============================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 16px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-behavior: smooth; }
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  /* Final-guard against any descendant bleeding past the viewport.
+     clip (not hidden) avoids creating a scroll container, so the
+     sticky header keeps working. */
+  overflow-x: clip;
+  max-width: 100%;
+}
 
 body {
   background: var(--bg);
@@ -76,7 +91,9 @@ body {
   font-family: var(--font);
   line-height: 1.6;
   min-height: 100vh;
-  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   position: relative;
 }
 
@@ -87,10 +104,11 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(1100px 700px at 14% -8%, rgba(124, 58, 237, 0.40), transparent 60%),
-    radial-gradient(900px 620px at 92% 6%, rgba(212, 175, 55, 0.12), transparent 58%),
-    radial-gradient(1200px 900px at 50% 120%, rgba(109, 40, 217, 0.28), transparent 60%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 48%, var(--bg) 100%);
+    radial-gradient(1100px 720px at 10% -10%, rgba(124, 58, 237, 0.30), transparent 60%),
+    radial-gradient(820px 560px at 90% 2%, rgba(34, 211, 238, 0.10), transparent 58%),
+    radial-gradient(680px 520px at 98% 10%, rgba(212, 175, 55, 0.10), transparent 60%),
+    radial-gradient(1200px 920px at 50% 122%, rgba(99, 102, 241, 0.22), transparent 62%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 46%, var(--bg) 100%);
 }
 
 /* Fine grain overlay for texture (no external asset) */
@@ -220,19 +238,23 @@ nav a.active { color: var(--gold-light); }
   position: absolute;
   top: -120px;
   left: 50%;
-  width: 620px;
-  height: 620px;
+  /* Sized in viewport units so the ring can never exceed the screen on
+     narrow devices — this was the sole source of global horizontal overflow. */
+  width: min(620px, 86vw);
+  height: min(620px, 86vw);
   transform: translateX(-50%);
   z-index: -1;
   border-radius: 50%;
   background:
     conic-gradient(from 0deg,
       rgba(212, 175, 55, 0.0) 0deg,
-      rgba(212, 175, 55, 0.18) 70deg,
-      rgba(139, 92, 246, 0.0) 150deg,
-      rgba(139, 92, 246, 0.22) 250deg,
+      rgba(212, 175, 55, 0.20) 60deg,
+      rgba(34, 211, 238, 0.0) 130deg,
+      rgba(34, 211, 238, 0.18) 195deg,
+      rgba(139, 92, 246, 0.0) 250deg,
+      rgba(139, 92, 246, 0.24) 305deg,
       rgba(212, 175, 55, 0.0) 360deg);
-  filter: blur(28px);
+  filter: blur(30px);
   opacity: 0.85;
   animation: spin 38s linear infinite;
 }
@@ -432,8 +454,12 @@ nav a.active { color: var(--gold-light); }
   font-size: 0.9rem;
   font-family: var(--font);
   outline: none;
+  max-width: 100%;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+/* Native date input can carry an intrinsic min-width on some engines —
+   pin it so it always fits its column on mobile. */
+#date-picker { width: 100%; max-width: 100%; }
 .dashboard-controls input:focus,
 .dashboard-controls select:focus {
   border-color: var(--purple-light);

@@ -1,7 +1,7 @@
 /* ────────────────────────────────────────────── */
 /*  Invictus Edge — Signals. Cycles. Conviction. */
 /*  Numerological Timing Engine                  */
-/*  Ted House Method                            */
+/*  Cycle Timing Method                         */
 /* ────────────────────────────────────────────── */
 
 "use strict";
@@ -10,7 +10,6 @@
    CONSTANTS
    ============================================== */
 
-var TED_BIRTH = { month: 5, day: 1, year: 1999 };
 var MASTERS = { 11: true, 22: true, 33: true };
 
 /* ==============================================
@@ -99,28 +98,9 @@ function calcUD(year, month, day) {
 }
 
 /* ==============================================
-   PERSONAL CYCLES (Ted House Method)
-   ============================================== */
-
-function calcPY(year, birthMonth, birthDay) {
-  "use strict";
-  birthMonth = birthMonth || TED_BIRTH.month;
-  birthDay = birthDay || TED_BIRTH.day;
-  return makeCycleResult(birthMonth + birthDay + digitSum(year));
-}
-
-function calcPM(pyCompound, currentMonth) {
-  "use strict";
-  return makeCycleResult(pyCompound + currentMonth);
-}
-
-function calcPD(pmCompound, currentDay) {
-  "use strict";
-  return makeCycleResult(pmCompound + currentDay);
-}
-
-/* ==============================================
-   INSTRUMENT CYCLES
+   INSTRUMENT CYCLES (per-symbol, derived from the
+   instrument's own foundation/listing date — never
+   from any person's birth data)
    ============================================== */
 
 function getInstrumentFoundation(foundationDate) {
@@ -164,15 +144,11 @@ function getInstrumentPD(foundationDate, year, month, day) {
    ALL-IN-ONE READINGS
    ============================================== */
 
-function getDailyReading(date, birthMonth, birthDay) {
+function getDailyReading(date) {
   "use strict";
   var year = date.getUTCFullYear();
   var month = date.getUTCMonth() + 1;
   var day = date.getUTCDate();
-
-  var py = calcPY(year, birthMonth, birthDay);
-  var pm = calcPM(py.compound, month);
-  var pd = calcPD(pm.compound, day);
 
   return {
     date: toDateStr(date),
@@ -180,11 +156,6 @@ function getDailyReading(date, birthMonth, birthDay) {
       year: calcUY(year),
       month: calcUM(year, month),
       day: calcUD(year, month, day)
-    },
-    personal: {
-      year: py,
-      month: pm,
-      day: pd
     }
   };
 }
@@ -198,47 +169,11 @@ function getInstrumentReading(symbol, date, foundationDate) {
   return {
     symbol: symbol,
     foundation: getInstrumentFoundation(foundationDate),
-    personal: {
+    cycle: {
       year: getInstrumentPY(foundationDate, year),
       month: getInstrumentPM(foundationDate, year, month),
       day: getInstrumentPD(foundationDate, year, month, day)
     }
-  };
-}
-
-function getMarketSnapshot(date, instrumentMetas) { // instrumentMetas is a map of {symbol: {ipoDate: "YYYY-MM-DD", ...}}
-  "use strict";
-  var reading = getDailyReading(date);
-  var spyMeta = instrumentMetas.SPY || { ipoDate: "1993-01-22" }; // Fallback to hardcoded if not provided
-  var qqqMeta = instrumentMetas.QQQ || { ipoDate: "1999-03-10" }; // Fallback to hardcoded if not provided
-
-  var spy = getInstrumentReading("SPY", date, spyMeta.ipoDate);
-  var qqq = getInstrumentReading("QQQ", date, qqqMeta.ipoDate);
-
-  // Build compatibility line
-  var compat = "";
-  var td = reading.personal.day.reduced;
-  var sd = spy.personal.day.reduced;
-  var qd = qqq.personal.day.reduced;
-  if (td === sd && td === qd) {
-    compat = "Triple alignment — " + reading.personal.day.display + " across Ted, SPY, QQQ";
-  } else if (td === sd) {
-    compat = "Ted & SPY aligned at " + td + " — broad market confirmation";
-  } else if (td === qd) {
-    compat = "Ted & QQQ aligned at " + td + " — tech momentum play";
-  } else {
-    compat = "Ted " + reading.personal.day.display + " | SPY " + spy.personal.day.display + " | QQQ " + qqq.personal.day.display;
-  }
-
-  return {
-    date: reading.date,
-    universal: reading.universal,
-    trader: reading.personal,
-    instruments: {
-      SPY: spy,
-      QQQ: qqq
-    },
-    compatibility: compat
   };
 }
 
@@ -259,12 +194,7 @@ window.InvictusNumerology = {
   calcUM: calcUM,
   calcUD: calcUD,
 
-  // Personal
-  calcPY: calcPY,
-  calcPM: calcPM,
-  calcPD: calcPD,
-
-  // Instrument
+  // Instrument (per-symbol cycles)
   getInstrumentFoundation: getInstrumentFoundation,
   getInstrumentPY: getInstrumentPY,
   getInstrumentPM: getInstrumentPM,
@@ -272,10 +202,5 @@ window.InvictusNumerology = {
   getInstrumentReading: getInstrumentReading,
 
   // All-in-One
-  getDailyReading: getDailyReading,
-  getMarketSnapshot: getMarketSnapshot,
-
-  // Constants (for tests)
-  TED_BIRTH_MONTH: TED_BIRTH.month,
-  TED_BIRTH_DAY: TED_BIRTH.day,
+  getDailyReading: getDailyReading
 };

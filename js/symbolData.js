@@ -5,7 +5,7 @@
 "use strict";
 
 window.InvictusSymbolData = {
-  // Provided by Ted
+  // Core index ETFs
   SPY: {
     label: "SPY",
     type: "ETF",
@@ -17,7 +17,7 @@ window.InvictusSymbolData = {
     founded: { month: 3, day: 10, year: 1999, source: "Inception" }
   },
 
-  // Added by Chronos
+  // Additional equities
   NVDA: {
     label: "NVDA",
     type: "Equity",

@@ -166,23 +166,23 @@ document.addEventListener("DOMContentLoaded", () => {
         numerologyContainer.innerHTML = `
             <div class="grid-row grid-row-3">
                 <div class="card card-ud"><div class="card-title">Universal Day</div><div class="card-value">${data.ud.value}<span class="card-number">/${data.ud.reduced}</span></div><div class="card-chain">UY: ${data.ud.universalYear} — UM: ${data.ud.universalMonth}</div></div>
-                <div class="card card-pd"><div class="card-title">Personal Day</div><div class="card-value">${data.pd.value}<span class="card-number">/${data.pd.reduced}</span></div><div class="card-chain">PY: ${data.pd.personalYear} — PM: ${data.pd.personalMonth}</div></div>
+                <div class="card card-pd"><div class="card-title">${data.symbolFoundation.symbol} Cycle Day</div><div class="card-value">${data.symbolCycle.value}<span class="card-number">/${data.symbolCycle.reduced}</span></div><div class="card-chain">Symbol session cycle</div></div>
                 <div class="card instr-current"><div class="card-title">${data.symbolFoundation.symbol} Foundation</div><div class="card-value">${data.symbolFoundation.value}<span class="card-number">/${data.symbolFoundation.reduced}</span></div><div class="card-chain">${data.symbolFoundation.date}</div></div>
             </div>
             <div class="grid-row grid-row-2">
-                <div class="card compat-card"><div class="card-title">${data.symbolFoundation.symbol} Universal Compatibility</div><div class="compat-text">${data.compatibility.universal}</div></div>
-                <div class="card compat-card"><div class="card-title">${data.symbolFoundation.symbol} Personal Compatibility</div><div class="compat-text">${data.compatibility.personal}</div></div>
+                <div class="card compat-card"><div class="card-title">Market Cycle Alignment</div><div class="compat-text">${data.compatibility.universal}</div></div>
+                <div class="card compat-card"><div class="card-title">${data.symbolFoundation.symbol} Cycle Alignment</div><div class="compat-text">${data.compatibility.cycle}</div></div>
             </div>
             <div class="grid-row grid-row-2">
                 <div class="card energy-card"><div class="card-title">Universal Energy Spec</div><div class="energy-spec">${data.universalEnergy.spec}</div><div class="energy-tags">${data.universalEnergy.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div></div>
-                <div class="card energy-card"><div class="card-title">Personal Energy Spec</div><div class="energy-spec">${data.personalEnergy.spec}</div><div class="energy-tags">${data.personalEnergy.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div></div>
+                <div class="card energy-card"><div class="card-title">${data.symbolFoundation.symbol} Session Energy</div><div class="energy-spec">${data.symbolEnergy.spec}</div><div class="energy-tags">${data.symbolEnergy.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div></div>
             </div>
             <div class="grid-row"><div class="card guardrail-card ${data.guardrail.type}"><div class="card-title">Guardrail</div><div class="guardrail-text">${data.guardrail.message}</div><div class="market-notice">A ${data.guardrail.marketBias} day for ${data.symbolFoundation.symbol}</div></div></div>`;
 
         document.getElementById("sig-ud").textContent = data.ud.reduced;
         document.getElementById("sig-ud-int").textContent = data.ud.interpretation;
-        document.getElementById("sig-pd").textContent = data.pd.reduced;
-        document.getElementById("sig-pd-int").textContent = data.pd.interpretation;
+        document.getElementById("sig-pd").textContent = data.symbolCycle.reduced;
+        document.getElementById("sig-pd-int").textContent = data.symbolCycle.interpretation;
         const signalItem = document.getElementById("sig-signal");
         const signalIntItem = document.getElementById("sig-signal-int");
         const parent = signalItem.parentElement;
@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function computeNumerologyAlignment(symbol) {
-        if (!currentCalculations || !currentCalculations.ud || !currentCalculations.pd) return false;
+        if (!currentCalculations || !currentCalculations.ud) return false;
         const sym = String(symbol || "").toUpperCase();
         if (!FOUNDATION_DATES[sym]) return false;
         try {
@@ -223,9 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!numerology) return false;
             const targetDate = new Date((datePicker.value || new Date().toISOString().split("T")[0]) + "T00:00:00Z");
             const inst = numerology.getInstrumentReading(sym, targetDate, FOUNDATION_DATES[sym]);
-            const ud = currentCalculations.ud.reduced;
-            const instReduced = inst.foundation.reduced;
-            return ud === instReduced || currentCalculations.pd.reduced === instReduced;
+            return currentCalculations.ud.reduced === inst.foundation.reduced;
         } catch (e) {
             return false;
         }
@@ -238,21 +236,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const daily = numerology.getDailyReading(targetDate);
             const instrument = numerology.getInstrumentReading(symbol, targetDate, foundationDate);
             const ud = daily.universal.day;
-            const pd = daily.personal.day;
+            const symCycle = instrument.cycle.day;
             const inst = instrument.foundation;
             const universalEnergy = getEnergySpec(ud.reduced);
-            const personalEnergy = getEnergySpec(pd.reduced);
-            const alignment = ud.reduced === inst.reduced || pd.reduced === inst.reduced;
+            const symbolEnergy = getEnergySpec(symCycle.reduced);
+            const alignment = ud.reduced === inst.reduced || symCycle.reduced === inst.reduced;
             currentCalculations = {
                 ud: { value: ud.compound, reduced: ud.reduced, display: ud.display, universalYear: daily.universal.year.display, universalMonth: daily.universal.month.display, interpretation: universalEnergy.spec },
-                pd: { value: pd.compound, reduced: pd.reduced, display: pd.display, personalYear: daily.personal.year.display, personalMonth: daily.personal.month.display, interpretation: personalEnergy.spec },
+                symbolCycle: { value: symCycle.compound, reduced: symCycle.reduced, display: symCycle.display, interpretation: symbolEnergy.spec },
                 symbolFoundation: { symbol, value: inst.compound, reduced: inst.reduced, date: foundationDate },
                 compatibility: {
                     universal: `${symbol} foundation ${inst.display} vs Universal Day ${ud.display} — ${ud.reduced === inst.reduced ? "aligned" : "not aligned"}`,
-                    personal: `${symbol} foundation ${inst.display} vs Ted Personal Day ${pd.display} — ${pd.reduced === inst.reduced ? "aligned" : "not aligned"}`
+                    cycle: `${symbol} foundation ${inst.display} vs ${symbol} cycle day ${symCycle.display} — ${symCycle.reduced === inst.reduced ? "aligned" : "not aligned"}`
                 },
-                universalEnergy, personalEnergy,
-                guardrail: { type: alignment ? "aligned" : "neutral", message: alignment ? `${symbol} is numerologically aligned today. Still require chart confirmation.` : `${symbol} has no direct numerology alignment today. Let price/VWAP confirm.`, marketBias: alignment ? "heightened attention" : "neutral/planning" },
+                universalEnergy, symbolEnergy,
+                guardrail: { type: alignment ? "aligned" : "neutral", message: alignment ? `${symbol} is numerologically aligned today. Still require chart confirmation.` : `${symbol} has no direct cycle alignment today. Let price/VWAP confirm.`, marketBias: alignment ? "heightened attention" : "neutral/planning" },
                 signal: getVerdict(symbol, date)
             };
             renderNumerologyDashboard(currentCalculations);

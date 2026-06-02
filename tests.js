@@ -33,11 +33,11 @@ test("reduces ordinary compounds", () => {
   assert.strictEqual(n.formatCompoundReduced(34), "34/7");
 });
 
-test("calculates Ted personal cycle for 2026-05-31", () => {
+test("daily reading exposes only universal cycles (no personal leak)", () => {
   const reading = n.getDailyReading(new Date("2026-05-31T00:00:00Z"));
-  assert.strictEqual(reading.personal.year.display, "16/7");
-  assert.strictEqual(reading.personal.month.display, "21/3");
-  assert.strictEqual(reading.personal.day.display, "52/7");
+  assert.strictEqual(reading.personal, undefined);
+  assert(reading.universal, "universal block should exist");
+  assert(reading.universal.year && reading.universal.month && reading.universal.day);
 });
 
 test("calculates universal day from date digits", () => {
