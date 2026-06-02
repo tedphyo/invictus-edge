@@ -1,0 +1,6 @@
+# Mechanism stays local — this public site only ships the precomputed,
+# mechanism-free verdict table (data/calendar-verdicts.json). The scoring
+# code, calibrated model, and raw training bars never leave the workbench.
+/tools/
+/data/model.json
+/data/bars_*.csv

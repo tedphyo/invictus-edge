@@ -136,6 +136,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function fmt(n, d = 2) { return Number.isFinite(Number(n)) ? Number(n).toFixed(d) : "--"; }
 
+    // ── Cycle-bias verdict lookup (precomputed, mechanism-free) ──
+    function getVerdict(sym, dateStr) {
+        if (!window.InvictusVerdicts) return null;
+        return window.InvictusVerdicts.get(String(sym).toUpperCase(), dateStr);
+    }
+    function todayStr() { return new Date().toISOString().split("T")[0]; }
+
     function getEnergySpec(n) {
         const map = {
             1: { spec: "Initiation, leadership, impulse", tags: ["push", "fresh start"] },
@@ -178,28 +185,33 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("sig-pd-int").textContent = data.pd.interpretation;
         const signalItem = document.getElementById("sig-signal");
         const signalIntItem = document.getElementById("sig-signal-int");
-        signalItem.textContent = data.signal.value || "--";
-        signalIntItem.textContent = data.signal.interpretation || "No signal active";
-        signalItem.parentElement.classList.remove("signal-7", "signal-11", "signal-28");
-        if (data.signal.value) signalItem.parentElement.classList.add(`signal-${data.signal.value}`);
+        const parent = signalItem.parentElement;
+        parent.classList.remove("v-srally", "v-rally", "v-neutral", "v-bear", "v-sbear", "v-vol");
+        const verdict = data.signal;
+        if (verdict && verdict.v && window.InvictusVerdicts) {
+            const meta = window.InvictusVerdicts.meta(verdict.v);
+            signalItem.textContent = meta.sym;
+            signalIntItem.textContent = meta.tag + " — " + meta.note;
+            parent.classList.add(meta.cls);
+        } else {
+            signalItem.textContent = "—";
+            signalIntItem.textContent = "Cycle bias is modeled for SPY, QQQ and DIA.";
+        }
     }
 
-    function updateSignalBanner(signalValue) {
+    // Chart banner reflects the CHART symbol's cycle bias for today (verdict model).
+    function updateChartBanner() {
         if (!signalBanner) return;
-        signalBanner.classList.remove("banner-7", "banner-11", "banner-28", "banner-none");
-        if (signalValue === 7) {
-            signalBanner.classList.add("banner-7");
-            signalBanner.innerHTML = "<span>&#9888;&#65039;</span> SIGNAL 7 &mdash; SHORT BIAS TODAY";
-        } else if (signalValue === 11) {
-            signalBanner.classList.add("banner-11");
-            signalBanner.innerHTML = "<span>&#128680;</span> SIGNAL 11 &mdash; COLLAPSE WATCH";
-        } else if (signalValue === 28) {
-            signalBanner.classList.add("banner-28");
-            signalBanner.innerHTML = "<span>&#128176;</span> SIGNAL 28 &mdash; WEALTH SETUP";
-        } else {
+        signalBanner.className = "signal-banner";
+        const v = getVerdict(chartSymbol, todayStr());
+        if (!v || !window.InvictusVerdicts) {
             signalBanner.classList.add("banner-none");
-            signalBanner.textContent = "No cycle signal today";
+            signalBanner.textContent = "Cycle bias loading…";
+            return;
         }
+        const meta = window.InvictusVerdicts.meta(v.v);
+        signalBanner.classList.add(meta.cls);
+        signalBanner.innerHTML = "<span>" + meta.sym + "</span> " + chartSymbol + " CYCLE BIAS &mdash; " + meta.tag;
     }
 
     function computeNumerologyAlignment(symbol) {
@@ -241,10 +253,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 universalEnergy, personalEnergy,
                 guardrail: { type: alignment ? "aligned" : "neutral", message: alignment ? `${symbol} is numerologically aligned today. Still require chart confirmation.` : `${symbol} has no direct numerology alignment today. Let price/VWAP confirm.`, marketBias: alignment ? "heightened attention" : "neutral/planning" },
-                signal: { value: [7, 11, 28].includes(pd.compound) ? pd.compound : null, interpretation: [7, 11, 28].includes(pd.compound) ? "Cycle signal active — use as timing context, not standalone entry." : "No special cycle signal active." }
+                signal: getVerdict(symbol, date)
             };
             renderNumerologyDashboard(currentCalculations);
-            updateSignalBanner(currentCalculations.signal.value);
+            updateChartBanner();
         } catch (error) {
             console.error("Numerology calculation failed:", error);
             numerologyContainer.innerHTML = `<div class="numerology-unavailable"><div class="card-title">Numerology</div><div class="unavailable-label">Cycle calculation unavailable</div></div>`;
@@ -405,6 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadChart(symbol) {
         chartSymbol = symbol;
         chartTabs.forEach(btn => btn.classList.toggle("active", btn.dataset.chartSymbol === symbol));
+        updateChartBanner();
         renderTradingViewWidget(symbol);
         const quote = await fetchQuote(symbol);
         renderBreakdown(quote);
@@ -587,6 +600,12 @@ document.addEventListener("DOMContentLoaded", () => {
             refreshLive();
             refreshWatchlistData();
         }
+    });
+
+    // Verdicts load asynchronously (calendar.js) — refresh banner + bias card once ready.
+    document.addEventListener("invictus-verdicts-ready", () => {
+        updateChartBanner();
+        refreshNumerology(selectedSymbol);
     });
 
     // ── Init ──

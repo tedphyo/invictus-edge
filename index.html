@@ -23,10 +23,11 @@
       </div>
       <nav>
         <a href="#calculator" class="active">Numerology</a>
+        <a href="#calendar">Calendar</a>
         <a href="#market">Market Intel</a>
         <a href="#signals">Signals</a>
         <a href="#about">About</a>
-        <a href="https://github.com/tedphyo/invictus-edge" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://tedphyo.github.io/Esoteric-Trading/" target="_blank" rel="noopener">Full App &#8599;</a>
       </nav>
     </div>
   </header>
@@ -107,6 +108,19 @@
       </div>
       <div class="dashboard" id="numerology-container">
         <div class="result-empty">Loading dashboard&hellip;</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="calendar">
+    <div class="container">
+      <div class="section-header">
+        <div class="eyebrow">Cycle Bias</div>
+        <h2>Cycle Calendar</h2>
+        <p>The day's bias read for each index &mdash; pick a date to load it in the dashboard above.</p>
+      </div>
+      <div id="cycle-calendar" class="cycle-calendar">
+        <div class="cal-loading">Loading cycle calendar&hellip;</div>
       </div>
     </div>
   </section>
@@ -220,8 +234,8 @@
           </div>
           <div class="signal-item">
             <div class="value" id="sig-signal">--</div>
-            <div class="label">Signal</div>
-            <div class="interpretation" id="sig-signal-int">No signal active</div>
+            <div class="label">Cycle Bias</div>
+            <div class="interpretation" id="sig-signal-int">Loading cycle bias&hellip;</div>
           </div>
         </div>
         <div class="signal-footnote">
@@ -255,6 +269,7 @@
   </footer>
 
   <script src="js/numerology.js"></script>
+  <script src="js/calendar.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

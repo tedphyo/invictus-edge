@@ -969,3 +969,142 @@ footer p:first-child { font-family: var(--display); font-weight: 600; font-size:
   header, footer, .hero, .pillars, .timeframe-selector, .chart-tabs { display: none; }
   .card, .market-card { background: #fff; border-color: #ccc; box-shadow: none; }
 }
+
+/* ============================== CYCLE CALENDAR ============================== */
+.cycle-calendar { width: 100%; }
+.cal-shell {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.4rem; box-shadow: var(--shadow); backdrop-filter: blur(8px);
+}
+.cal-loading, .cal-error { padding: 2.4rem 1rem; text-align: center; color: var(--dim); font-size: 0.92rem; }
+.cal-error { color: var(--red); }
+
+.cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.cal-symbols { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.cal-pill {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  padding: 0.42rem 0.8rem; border-radius: var(--radius-sm); cursor: pointer;
+  background: var(--inset); border: 1px solid var(--border); color: var(--text-soft);
+  font-family: var(--mono); font-size: 0.86rem; font-weight: 700; letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+.cal-pill:hover { border-color: var(--border-strong); color: var(--text); }
+.cal-pill.active { background: var(--grad-purple); border-color: transparent; color: #fff; box-shadow: var(--glow-purple); }
+.cal-pill-sub { font-family: var(--font); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.4px; opacity: 0.72; text-transform: uppercase; }
+
+.cal-nav { display: flex; align-items: center; gap: 0.5rem; }
+.cal-navbtn {
+  width: 34px; height: 34px; border-radius: 9px; cursor: pointer; line-height: 1;
+  background: var(--inset); border: 1px solid var(--border); color: var(--text);
+  font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+}
+.cal-navbtn:hover:not(:disabled) { border-color: var(--purple); color: var(--purple-light); }
+.cal-navbtn:disabled { opacity: 0.32; cursor: not-allowed; }
+.cal-month { min-width: 150px; text-align: center; font-family: var(--display); font-size: 1.12rem; font-weight: 600; color: var(--text); }
+.cal-today {
+  padding: 0.4rem 0.78rem; border-radius: 9px; cursor: pointer; font-size: 0.74rem; font-weight: 700;
+  letter-spacing: 0.6px; text-transform: uppercase; background: transparent; border: 1px solid var(--gold-deep);
+  color: var(--gold-light); transition: all 0.2s ease;
+}
+.cal-today:hover { background: rgba(212, 175, 55, 0.12); border-color: var(--gold); }
+
+.cal-strip { margin-bottom: 1rem; min-height: 0; }
+.cal-strip-inner {
+  display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0.9rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--inset);
+}
+.cal-strip-sym { font-size: 1.1rem; line-height: 1; }
+.cal-strip-main { font-size: 0.9rem; color: var(--text); font-weight: 600; letter-spacing: 0.3px; }
+.cal-strip-main strong { font-family: var(--mono); }
+.cal-strip-cyc { margin-left: auto; font-family: var(--mono); font-size: 0.74rem; color: var(--dim); white-space: nowrap; }
+
+.cal-grid-head { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px; }
+.cal-dow { text-align: center; font-size: 0.64rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--faint); padding: 0.2rem 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-blank { background: transparent; border: none; }
+.cal-cell {
+  position: relative; min-height: 78px; padding: 0.4rem 0.45rem; border-radius: 10px; cursor: pointer; text-align: left;
+  background: var(--inset); border: 1px solid var(--hair); border-left: 3px solid transparent;
+  display: flex; flex-direction: column; gap: 0.25rem; transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+  font-family: var(--font); color: var(--text);
+}
+.cal-cell:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+.cal-daynum { font-family: var(--mono); font-size: 0.82rem; font-weight: 700; color: var(--text-soft); }
+.cal-cyc { font-family: var(--mono); font-size: 0.6rem; color: var(--faint); letter-spacing: 0.5px; }
+.cal-weekend { cursor: default; opacity: 0.4; background: transparent; }
+.cal-weekend:hover { transform: none; border-color: var(--hair); }
+.cal-today-cell { box-shadow: inset 0 0 0 1px var(--gold); }
+.cal-today-cell .cal-daynum { color: var(--gold-light); }
+.cal-selected { outline: 2px solid var(--purple); outline-offset: 0; }
+
+.cal-badge {
+  margin-top: auto; display: inline-flex; align-items: center; gap: 0.28rem; align-self: flex-start;
+  padding: 0.16rem 0.4rem; border-radius: 999px; font-size: 0.58rem; font-weight: 800; letter-spacing: 0.4px;
+  border: 1px solid transparent; line-height: 1.2; max-width: 100%;
+}
+.cal-badge-sym { font-size: 0.62rem; line-height: 1; }
+.cal-badge-tag { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* verdict palette (shared by cells, badges, legend dots, chart banner, today-strip) */
+.cal-cell.v-srally { border-left-color: #34d399; }
+.cal-cell.v-rally  { border-left-color: rgba(52, 211, 153, 0.6); }
+.cal-cell.v-bear   { border-left-color: rgba(251, 113, 133, 0.6); }
+.cal-cell.v-sbear  { border-left-color: #fb3a5e; }
+.cal-cell.v-vol    { border-left-color: var(--gold); }
+.cal-cell.v-neutral{ border-left-color: rgba(170, 142, 255, 0.28); }
+
+.v-srally.cal-badge, .v-srally.cal-strip-inner { background: rgba(52, 211, 153, 0.18); border-color: rgba(52, 211, 153, 0.5); color: #6ee7b7; }
+.v-rally.cal-badge,  .v-rally.cal-strip-inner  { background: rgba(52, 211, 153, 0.10); border-color: rgba(52, 211, 153, 0.30); color: #34d399; }
+.v-neutral.cal-badge,.v-neutral.cal-strip-inner{ background: rgba(170, 142, 255, 0.08); border-color: var(--border); color: var(--dim); }
+.v-bear.cal-badge,   .v-bear.cal-strip-inner   { background: rgba(251, 113, 133, 0.10); border-color: rgba(251, 113, 133, 0.30); color: #fb7185; }
+.v-sbear.cal-badge,  .v-sbear.cal-strip-inner  { background: rgba(244, 63, 94, 0.18); border-color: rgba(244, 63, 94, 0.5); color: #fda4af; }
+.v-vol.cal-badge,    .v-vol.cal-strip-inner    { background: rgba(212, 175, 55, 0.12); border-color: rgba(212, 175, 55, 0.45); color: var(--gold-light); }
+
+.cal-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--hair); }
+.cal-legend-item { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--dim); letter-spacing: 0.3px; }
+.cal-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.cal-dot.v-srally { background: #34d399; }
+.cal-dot.v-rally  { background: rgba(52, 211, 153, 0.55); }
+.cal-dot.v-neutral{ background: rgba(170, 142, 255, 0.4); }
+.cal-dot.v-bear   { background: rgba(251, 113, 133, 0.55); }
+.cal-dot.v-sbear  { background: #fb3a5e; }
+.cal-dot.v-vol    { background: var(--gold); }
+
+.cal-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+.cal-foot-note { font-size: 0.72rem; color: var(--faint); line-height: 1.5; max-width: 60ch; }
+.cal-launch {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.4px; color: var(--gold-light); white-space: nowrap;
+  padding: 0.4rem 0.85rem; border-radius: 9px; border: 1px solid var(--gold-deep); transition: all 0.2s ease;
+}
+.cal-launch:hover { background: rgba(212, 175, 55, 0.12); border-color: var(--gold); transform: translateY(-1px); }
+
+/* chart banner — verdict styling (replaces retired 7/11/28 signal banner) */
+.signal-banner.v-srally { background: rgba(52, 211, 153, 0.16); border-color: rgba(52, 211, 153, 0.5); color: #6ee7b7; }
+.signal-banner.v-rally  { background: rgba(52, 211, 153, 0.10); border-color: rgba(52, 211, 153, 0.32); color: #34d399; }
+.signal-banner.v-neutral{ background: rgba(139, 92, 246, 0.06); border-color: var(--border); color: var(--text-soft); }
+.signal-banner.v-bear   { background: rgba(251, 113, 133, 0.10); border-color: rgba(251, 113, 133, 0.32); color: #fb7185; }
+.signal-banner.v-sbear  { background: rgba(244, 63, 94, 0.16); border-color: rgba(244, 63, 94, 0.5); color: #fda4af; }
+.signal-banner.v-vol    { background: rgba(212, 175, 55, 0.12); border-color: rgba(212, 175, 55, 0.45); color: var(--gold-light); }
+
+/* Cycle Bias card (#signals) — color the verdict glyph by direction */
+.signal-item.v-srally .value, .signal-item.v-rally .value { background: none; -webkit-text-fill-color: #34d399; color: #34d399; }
+.signal-item.v-bear .value, .signal-item.v-sbear .value { background: none; -webkit-text-fill-color: #fb7185; color: #fb7185; }
+.signal-item.v-vol .value { background: none; -webkit-text-fill-color: var(--gold-light); color: var(--gold-light); }
+.signal-item.v-neutral .value { background: none; -webkit-text-fill-color: var(--dim); color: var(--dim); }
+
+@media (max-width: 720px) {
+  .cal-shell { padding: 1rem 0.8rem; }
+  .cal-toolbar { justify-content: center; }
+  .cal-grid, .cal-grid-head { gap: 4px; }
+  .cal-cell { min-height: 58px; padding: 0.3rem 0.32rem; border-radius: 8px; }
+  .cal-cyc { display: none; }
+  .cal-badge-tag { display: none; }
+  .cal-badge { padding: 0.14rem 0.32rem; align-self: stretch; justify-content: center; }
+  .cal-foot { justify-content: center; text-align: center; }
+}
+@media (max-width: 420px) {
+  .cal-month { min-width: 110px; font-size: 0.98rem; }
+  .cal-dow { font-size: 0.56rem; letter-spacing: 0.5px; }
+  .cal-cell { min-height: 50px; }
+  .cal-daynum { font-size: 0.72rem; }
+}
