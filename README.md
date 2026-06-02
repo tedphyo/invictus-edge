@@ -1,128 +1,111 @@
-# Invictus Edge — Signals. Cycles. Conviction.
+# Invictus Edge — Signals · Cycles · Conviction
 
-Numerology-based market timing reference tool. Experimental research platform — not financial advice.
+Invictus Edge is a static research dashboard for market-timing context around SPY/QQQ and other liquid symbols. It combines a dark fintech UI, TradingView chart embed, symbol watchlist, and a summarized cycle score layer.
 
-## Quick Start
+**Status:** experimental research / educational use only. Not financial advice. Not a signal service.
 
-No build tools, no dependencies. Open the file directly or serve locally:
+## Live Site
 
-```bash
-# Option 1: Open directly (works for most browsers)
-open index.html
+- GitHub Pages: `https://tedphyo.github.io/invictus-edge/`
+- Repository: `https://github.com/tedphyo/invictus-edge`
 
-# Option 2: Local HTTP server (recommended — required for some browsers for security/CORS)
-# From project root:
-python3 -m http.server 8000
-# Then visit http://localhost:8000
-```
+## What It Does
 
-From Windows (PowerShell or CMD):
+- **Cycle dashboard:** displays date/symbol timing scores in a compact public-safe format.
+- **Symbol focus:** SPY and QQQ first, with support for searched/custom symbols.
+- **TradingView chart:** embedded chart panel with quick timeframe controls.
+- **Market cards:** quote/watchlist panels when a compatible backend is available.
+- **Mobile-first UI:** dark navy/gold brand system, responsive layout, no build step.
+- **Static deploy:** vanilla HTML/CSS/JS, GitHub Pages friendly.
 
-```powershell
-# From project root:
-python -m http.server 8000
-```
+## Public Scope
 
-## Data Sources & Limitations
-
-- **Numerology Engine**: Pure JavaScript (js/numerology.js), "Ted House Method" for compound and reduced numbers, master numbers (11, 22, 33) preserved. Birth data for personal cycles is pre-configured for "Ted" (month: 5, day: 1, year: 1999). Instrument foundation dates pre-configured for SPY (01/22/1993) and QQQ (03/10/1999).
-- **Market Data**: Currently uses static placeholder data (e.g., `---` for prices). The application does NOT fetch live market data. Any mentions of "live data" refer to future potential updates, not current functionality.
-- **Symbol Search**: Implemented as a dropdown selection for SPY and QQQ. No free-text symbol search yet.
-- **Auto-updating Dashboard**: Numerology calculations update dynamically based on the selected date and instrument. Market data placeholders do not auto-update as there is no live feed.
-
-## Tests
-
-```bash
-cd /mnt/c/Users/NCG/invictus-edge-standalone
-node tests.js
-```
-
-Run `node --check` on individual JS:
-
-```bash
-node --check js/numerology.js
-node --check js/app.js
-```
-
-The embedded JS in `index.html` (none present in this version, all JS is external) would be checked with:
-
-```bash
-node -e "
-var fs = require('fs');
-var html = fs.readFileSync('index.html', 'utf8');
-var matches = html.match(/<script>([\s\S]*?)<\/script>/g);
-var js = matches.map(function(m) { return m.replace(/<\/?script>/g, ''); }).join('\\n\\n');
-fs.writeFileSync('/tmp/invictus-check.js', js);
-" && node --check /tmp/invictus-check.js
-```
+The public app intentionally shows only summarized scores and labels. Internal research rules, weighting, private trade logic, broker execution code, and backtest implementation details are not exposed in this repository.
 
 ## Project Structure
 
+```text
+invictus-edge/
+├── index.html          # Static site shell
+├── css/styles.css      # Brand + responsive styles
+├── js/app.js           # UI, chart, watchlist, market bridge handling
+├── js/numerology.js    # Public-safe score engine
+├── js/symbolData.js    # Symbol metadata fallbacks
+├── logo.svg            # Invictus Edge shield mark
+├── tests.js            # Node sanity checks
+├── CHANGELOG.md        # Visible release history
+├── CONTRIBUTING.md     # Maintainer / contribution notes
+├── SECURITY.md         # Security and disclosure policy
+└── README.md
 ```
-invictus-edge-standalone/
-  index.html     — Main site (HTML + embedded CSS + links to external JS)
-  css/
-    styles.css   — Main styling
-  js/
-    app.js       — UI logic, dashboard rendering, event handlers
-    numerology.js— Core numerology engine (calculations, constants)
-  logo.svg       — Fintech shield logo (IE + candle motif)
-  tests.js       — Numerological engine unit tests (17 tests)
-  README.md      — This file
+
+## Run Locally
+
+No install required.
+
+```bash
+python3 -m http.server 8000
+# open http://localhost:8000
 ```
 
-## Features
+Windows PowerShell:
 
-- **Universal Day Calculator** — UY, UM, UD with compound/reduced display
-- **Personal Day Calculator** — PY, PM, PD based on birth data
-- **Cycle Signals** — numerology timing system (7=SHORT, 11=COLLAPSE, 28=WEALTH)
-- **Market Intel** — Reference placeholder cards (no live data)
-- Fully responsive — mobile, tablet, desktop, print
-- Dark fintech theme — navy/black with blue/gold accents
-- 2% data saver mode via `prefers-reduced-motion`
-- No external dependencies — vanilla HTML/CSS/JS only
+```powershell
+python -m http.server 8000
+```
 
-## Numerological Method
+You can also open `index.html` directly, but local HTTP is cleaner for browser security behavior.
 
-All calculations show both compound and reduced values:
+## Verification
 
-- **UY** — Universal Year: sum of year digits
-- **UM** — Universal Month: current month + UY (reduced)
-- **UD** — Universal Day: split day digits (ignore zeros), sum, add UM (reduced)
-- **PY** — Personal Year: birth month + birth day + year digits
-- **PM** — Personal Month: PY (compound) + current month
-- **PD** — Personal Day: PM (compound) + current day
+```bash
+node tests.js
+node --check js/numerology.js
+node --check js/app.js
+node --check js/symbolData.js
+```
 
-Master numbers (11, 22, 33) are preserved.
+Manual QA:
 
-## Important Notes
+- Page loads without console errors.
+- Logo renders.
+- Date changes update dashboard scores.
+- SPY/QQQ tabs switch chart focus.
+- Timeframe buttons update the TradingView iframe.
+- Offline backend state is clearly labeled instead of showing fake data.
+- Mobile width stays readable with no horizontal overflow.
 
-- **No live market data** is fetched or displayed. Prices are manual reference placeholders (`---`).
-- **Nothing on this site constitutes financial advice.**
-- This is an experimental research tool for educational purposes only.
-- Future update may add a live data bridge — for now, data is static.
+## Data / Backend Notes
 
-## QA Checklist (for manual verification)
+This static repo can run without a backend. If `/api/*` endpoints are unavailable, the UI falls back to offline placeholders and keeps the chart/widget usable.
 
-- [ ] `node tests.js` — all tests pass (confirm 17 passed)
-- [ ] `node --check js/numerology.js` and `node --check js/app.js` — passes with no syntax errors
-- [ ] Open `index.html` directly in browser — page loads without errors or console warnings
-- [ ] **Live Search / Symbol Switch**:
-    - [ ] Change "Instrument" dropdown (SPY & QQQ, SPY Only, QQQ Only) — dashboard cards update correctly to show/hide instrument-specific cards.
-    - [ ] Symbol-specific numerology (Instrument Cycles) updates correctly when symbol is switched.
-- [ ] **Data Auto-update**:
-    - [ ] Change "Select Date" input — Universal and Personal numerology (UY, UM, UD, PY, PM, PD) sections auto-recalculate and update displayed values.
-    - [ ] Signal panel values and interpretations update based on new date.
-- [ ] **Metadata / Founded Date Fallback**:
-    - [ ] Instrument cards (SPY, QQQ) correctly display "foundation" dates within their titles (e.g., "SPY &middot; 1/1").
-    - [ ] Verify the foundation date is derived from `INSTRUMENTS` constant in `js/numerology.js` (currently hardcoded to actual IPO dates).
-- [ ] Disclaimer present: "No financial advice", "experimental", "educational only".
-- [ ] Market intel displays `---` placeholders — no live/fake prices.
-- [ ] Market notice present: "Market data is manual reference only..."
-- [ ] Responsive at 768px and 480px — no overflow, readable text (manual browser resize check).
-- [ ] Print layout renders cleanly (manual print preview check).
-- [ ] No broken images (logo.svg loads).
-- [ ] SVG logo renders with IE shield + candles.
-- [ ] Brand line "Signals. Cycles. Conviction." visible in header.
-- [ ] Nav links scroll to correct sections.
-- [ ] No console errors on page load or when interacting with date/symbol selectors. 
+Expected optional endpoints:
+
+- `GET /api/quote/:symbol`
+- `GET /api/chart/:symbol?range=1d&interval=5m`
+- `GET /api/watchlist?symbols=SPY,QQQ,...`
+- `GET /api/search/:query`
+- `GET /api/symbol-meta?symbol=SPY`
+
+## Roadmap
+
+- Cleaner backend adapter contract for quotes/chart bars.
+- Public demo screenshots and short mobile walkthrough.
+- More complete symbol metadata coverage.
+- Accessibility pass for keyboard and screen-reader behavior.
+- Expanded test coverage for UI state transitions.
+
+## Maintainer
+
+Maintained by Ted Way Aung Phyo as part of an open-source trading automation and research stack.
+
+Core priorities:
+
+- protect private research logic;
+- avoid fake market data;
+- keep broker/order code separate and security-sensitive;
+- use automation to reduce review, testing, and deployment load.
+
+## Disclaimer
+
+Invictus Edge is experimental software for research and education. It does not provide investment advice, trade recommendations, or guaranteed outcomes. Markets involve risk.
