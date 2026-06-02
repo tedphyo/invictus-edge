@@ -569,12 +569,6 @@ body {
   border-radius: 4px;
   color: var(--dim);
   cursor: pointer;
-.watchlist-toggle {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--dim);
-  cursor: pointer;
   font-size: 14px;
   width: 24px;
   height: 24px;
