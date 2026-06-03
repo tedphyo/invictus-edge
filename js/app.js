@@ -159,22 +159,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     function todayStr() { return new Date().toISOString().split("T")[0]; }
 
+    // Each cycle number translated into a MARKET read (rooted in its numerology):
+    // the spec is how the tape tends to behave, the tags are the playbook action.
     function getEnergySpec(n) {
         const map = {
-            1: { spec: "Initiation, leadership, impulse", tags: ["push", "fresh start"] },
-            2: { spec: "Balance, patience, reaction", tags: ["wait", "confirm"] },
-            3: { spec: "Expansion, communication, volatility", tags: ["expressive", "range"] },
-            4: { spec: "Structure, discipline, support/resistance", tags: ["levels", "rules"] },
-            5: { spec: "Movement, change, momentum", tags: ["breakout", "adapt"] },
-            6: { spec: "Harmony, repair, mean reversion", tags: ["balance", "fade"] },
-            7: { spec: "Analysis, hidden risk, patience", tags: ["caution", "observe"] },
-            8: { spec: "Power, money, execution", tags: ["trend", "size carefully"] },
-            9: { spec: "Completion, release, reversal risk", tags: ["exhaustion", "close cycle"] },
-            11: { spec: "Master signal, sensitivity, sharp turns", tags: ["high alert", "intuition"] },
-            22: { spec: "Master builder, structure under pressure", tags: ["institutional", "big level"] },
-            33: { spec: "Master teacher, emotional extremes", tags: ["crowd emotion", "discipline"] }
+            1: { spec: "Trend ignition — fresh directional push, lead the breakout", tags: ["breakout", "lead the move"] },
+            2: { spec: "Two-sided balance — choppy range, wait for confirmation", tags: ["range-bound", "confirm first"] },
+            3: { spec: "Volatility expansion — wide, headline-driven swings", tags: ["wide range", "expansion"] },
+            4: { spec: "Structure holds — defined support/resistance, range discipline", tags: ["respect levels", "S/R holds"] },
+            5: { spec: "Momentum — fast directional moves, ride continuation", tags: ["momentum", "ride the trend"] },
+            6: { spec: "Mean reversion — fade extremes back toward VWAP/value", tags: ["mean reversion", "fade to VWAP"] },
+            7: { spec: "Trap risk — false breaks, low conviction, trim size", tags: ["fakeout risk", "reduce size"] },
+            8: { spec: "Institutional flow — strong trend follow-through, capital in motion", tags: ["smart money", "trend follow"] },
+            9: { spec: "Exhaustion — cycle climax, reversal & profit-take risk", tags: ["exhaustion", "reversal risk"] },
+            11: { spec: "Sharp inflection — violent two-way turns, stay nimble", tags: ["sharp turns", "high alert"] },
+            22: { spec: "Major level — institutional battleground, big-figure test", tags: ["major level", "institutional"] },
+            33: { spec: "Sentiment extreme — crowd capitulation or euphoria climax", tags: ["sentiment extreme", "stay disciplined"] }
         };
-        return map[n] || { spec: "Neutral cycle", tags: ["neutral"] };
+        return map[n] || { spec: "Neutral tape — no clear cycle edge", tags: ["neutral"] };
     }
 
     // ── Numerology dashboard render ──
