@@ -1129,7 +1129,7 @@ footer p:first-child { font-family: var(--display); font-weight: 600; font-size:
 .legal .disclaimer { margin: 2rem 0 0; }
 
 /* ============================== TRACK RECORD ============================== */
-.track-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 880px; margin: 0 auto 1.6rem; }
+.track-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; max-width: 560px; margin: 0 auto 1.6rem; }
 .tstat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 1.2rem; text-align: center; box-shadow: var(--shadow); backdrop-filter: blur(8px); }
 .tstat-num { font-family: var(--display); font-weight: 800; font-size: 2.2rem; letter-spacing: -0.5px; line-height: 1; background: var(--grad-gold); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .tstat-label { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-soft); margin-top: 0.7rem; }
