@@ -39,10 +39,16 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         search: function (query) {
             return "https://finnhub.io/api/v1/search?q=" + encodeURIComponent(query) + "&token=" + this.key;
+        },
+        profile: function (symbol) {
+            return "https://finnhub.io/api/v1/stock/profile2?symbol=" + encodeURIComponent(symbol) + "&token=" + this.key;
         }
     };
 
     // ── Foundation dates (numerology) ──
+    // Curated founding/inception dates take priority. Any symbol not listed here
+    // is resolved live from the data provider's listing (IPO) date and cached, so
+    // every searched ticker shows its OWN date — never a stale leftover.
     const FOUNDATION_DATES = {
         "SPY": "1993-01-22",
         "QQQ": "1999-03-10",
@@ -50,14 +56,24 @@ document.addEventListener("DOMContentLoaded", () => {
         "NVDA": "1993-04-05",
         "AAPL": "1976-04-01",
         "TSLA": "2003-07-01",
-        "MSFT": "1975-04-04"
+        "MSFT": "1975-04-04",
+        "AMD": "1969-05-01",
+        "INTC": "1968-07-18",
+        "GOOGL": "1998-09-04",
+        "GOOG": "1998-09-04",
+        "AMZN": "1994-07-05",
+        "META": "2004-02-04",
+        "NFLX": "1997-08-29"
     };
 
     const INDEX_SYMBOLS = ["SPY", "QQQ", "DIA"];
     const WATCHLIST_SYMBOLS = ["SPY", "QQQ", "NVDA", "AAPL", "TSLA", "MSFT"];
 
     let currentCalculations = {};
-    let selectedFoundationDate = "1993-01-22";
+    // Resolved foundation dates, seeded from the curated table and extended at
+    // runtime with provider-fetched listing dates. Keyed by uppercase symbol.
+    const foundationCache = Object.assign({}, FOUNDATION_DATES);
+    let numerologyReqSeq = 0;
     let selectedSymbol = currentSymbolDisplay.textContent || "SPY";
     let chartSymbol = "SPY";
     let watchlistData = [];
@@ -165,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderNumerologyDashboard(data) {
         numerologyContainer.innerHTML = `
             <div class="grid-row grid-row-3">
-                <div class="card card-ud"><div class="card-title">Universal Day</div><div class="card-value">${data.ud.value}<span class="card-number">/${data.ud.reduced}</span></div><div class="card-chain">UY: ${data.ud.universalYear} — UM: ${data.ud.universalMonth}</div></div>
+                <div class="card card-ud"><div class="card-title">Universal Day</div><div class="card-value">${data.ud.value}<span class="card-number">/${data.ud.reduced}</span></div><div class="card-chain">Universal Year ${data.ud.universalYear}</div></div>
                 <div class="card card-pd"><div class="card-title">${data.symbolFoundation.symbol} Cycle Day</div><div class="card-value">${data.symbolCycle.value}<span class="card-number">/${data.symbolCycle.reduced}</span></div><div class="card-chain">Symbol session cycle</div></div>
                 <div class="card instr-current"><div class="card-title">${data.symbolFoundation.symbol} Foundation</div><div class="card-value">${data.symbolFoundation.value}<span class="card-number">/${data.symbolFoundation.reduced}</span></div><div class="card-chain">${data.symbolFoundation.date}</div></div>
             </div>
@@ -217,12 +233,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function computeNumerologyAlignment(symbol) {
         if (!currentCalculations || !currentCalculations.ud) return false;
         const sym = String(symbol || "").toUpperCase();
-        if (!FOUNDATION_DATES[sym]) return false;
+        if (!foundationCache[sym]) return false;
         try {
             const numerology = window.InvictusNumerology;
             if (!numerology) return false;
             const targetDate = new Date((datePicker.value || new Date().toISOString().split("T")[0]) + "T00:00:00Z");
-            const inst = numerology.getInstrumentReading(sym, targetDate, FOUNDATION_DATES[sym]);
+            const inst = numerology.getInstrumentReading(sym, targetDate, foundationCache[sym]);
             return currentCalculations.ud.reduced === inst.foundation.reduced;
         } catch (e) {
             return false;
@@ -234,23 +250,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const numerology = window.InvictusNumerology;
             const targetDate = new Date(date + "T00:00:00Z");
             const daily = numerology.getDailyReading(targetDate);
+            const hasFoundation = !!foundationDate;
             const instrument = numerology.getInstrumentReading(symbol, targetDate, foundationDate);
             const ud = daily.universal.day;
             const symCycle = instrument.cycle.day;
             const inst = instrument.foundation;
             const universalEnergy = getEnergySpec(ud.reduced);
-            const symbolEnergy = getEnergySpec(symCycle.reduced);
-            const alignment = ud.reduced === inst.reduced || symCycle.reduced === inst.reduced;
+            const symbolEnergy = hasFoundation ? getEnergySpec(symCycle.reduced) : { spec: "Foundation date unavailable", tags: ["no data"] };
+            const alignment = hasFoundation && (ud.reduced === inst.reduced || symCycle.reduced === inst.reduced);
+            const foundationValue = hasFoundation ? inst.compound : "—";
+            const foundationReduced = hasFoundation ? inst.reduced : "—";
+            const foundationDisplay = hasFoundation ? inst.display : "—";
+            const cycleValue = hasFoundation ? symCycle.compound : "—";
+            const cycleReduced = hasFoundation ? symCycle.reduced : "—";
+            const cycleDisplay = hasFoundation ? symCycle.display : "—";
             currentCalculations = {
                 ud: { value: ud.compound, reduced: ud.reduced, display: ud.display, universalYear: daily.universal.year.display, universalMonth: daily.universal.month.display, interpretation: universalEnergy.spec },
-                symbolCycle: { value: symCycle.compound, reduced: symCycle.reduced, display: symCycle.display, interpretation: symbolEnergy.spec },
-                symbolFoundation: { symbol, value: inst.compound, reduced: inst.reduced, date: foundationDate },
+                symbolCycle: { value: cycleValue, reduced: cycleReduced, display: cycleDisplay, interpretation: symbolEnergy.spec },
+                symbolFoundation: { symbol, value: foundationValue, reduced: foundationReduced, date: hasFoundation ? foundationDate : "Listing date unavailable" },
                 compatibility: {
-                    universal: `${symbol} foundation ${inst.display} vs Universal Day ${ud.display} — ${ud.reduced === inst.reduced ? "aligned" : "not aligned"}`,
-                    cycle: `${symbol} foundation ${inst.display} vs ${symbol} cycle day ${symCycle.display} — ${symCycle.reduced === inst.reduced ? "aligned" : "not aligned"}`
+                    universal: hasFoundation ? `${symbol} foundation ${foundationDisplay} vs Universal Day ${ud.display} — ${ud.reduced === inst.reduced ? "aligned" : "not aligned"}` : `No foundation date on file for ${symbol}.`,
+                    cycle: hasFoundation ? `${symbol} foundation ${foundationDisplay} vs ${symbol} cycle day ${cycleDisplay} — ${symCycle.reduced === inst.reduced ? "aligned" : "not aligned"}` : `Cycle alignment needs a foundation date.`
                 },
                 universalEnergy, symbolEnergy,
-                guardrail: { type: alignment ? "aligned" : "neutral", message: alignment ? `${symbol} is numerologically aligned today. Still require chart confirmation.` : `${symbol} has no direct cycle alignment today. Let price/VWAP confirm.`, marketBias: alignment ? "heightened attention" : "neutral/planning" },
+                guardrail: { type: alignment ? "aligned" : "neutral", message: !hasFoundation ? `No foundation date on file for ${symbol}; lean on price/VWAP.` : (alignment ? `${symbol} is numerologically aligned today. Still require chart confirmation.` : `${symbol} has no direct cycle alignment today. Let price/VWAP confirm.`), marketBias: alignment ? "heightened attention" : "neutral/planning" },
                 signal: getVerdict(symbol, date)
             };
             renderNumerologyDashboard(currentCalculations);
@@ -441,13 +464,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ── Resolve a symbol's foundation date: curated table first, then the
+    //    provider's listing date (cached). Never returns another symbol's date. ──
+    async function resolveFoundationDate(sym) {
+        if (foundationCache[sym]) return foundationCache[sym];
+        try {
+            const res = await fetch(DATA_PROVIDER.profile(sym));
+            if (res.ok) {
+                const profile = await res.json();
+                const ipo = profile && profile.ipo;
+                if (typeof ipo === "string" && /^\d{4}-\d{2}-\d{2}$/.test(ipo)) {
+                    foundationCache[sym] = ipo;
+                    return ipo;
+                }
+            }
+        } catch (err) {
+            console.warn("Foundation date lookup failed for " + sym + ":", err.message || err);
+        }
+        return null;
+    }
+
     // ── Numerology refresh for the selected symbol ──
-    function refreshNumerology(symbol) {
+    async function refreshNumerology(symbol) {
         const sym = String(symbol).toUpperCase();
-        const foundationDate = FOUNDATION_DATES[sym] || null;
-        if (foundationDate) selectedFoundationDate = foundationDate;
         const today = datePicker.value || new Date().toISOString().split("T")[0];
-        fetchAndRenderNumerology(today, symbol, foundationDate || selectedFoundationDate);
+        const seq = ++numerologyReqSeq;
+        const foundationDate = await resolveFoundationDate(sym);
+        // A newer symbol/date request superseded this fetch — drop the stale render.
+        if (seq !== numerologyReqSeq) return;
+        fetchAndRenderNumerology(today, sym, foundationDate);
     }
 
     // ── Symbol search (Finnhub) ──

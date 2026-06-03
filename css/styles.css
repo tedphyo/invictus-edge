@@ -504,10 +504,21 @@ nav a.active { color: var(--brass-light); }
   font-family: var(--font);
   outline: none;
   max-width: 100%;
+  min-width: 0;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-/* Native date input can carry an intrinsic min-width — pin it to its column. */
-#date-picker { width: 100%; max-width: 100%; }
+/* Native date inputs (WebKit/iOS) carry an intrinsic min-width and right-align
+   their value, which overflows the column on mobile — normalize the box so it
+   fits its column exactly and the calendar icon sits on the right edge. */
+#date-picker {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#date-picker::-webkit-date-and-time-value { text-align: left; margin: 0; }
+#date-picker::-webkit-calendar-picker-indicator { margin-left: auto; flex-shrink: 0; }
 .dashboard-controls input:focus,
 .dashboard-controls select:focus {
   border-color: var(--brass);
