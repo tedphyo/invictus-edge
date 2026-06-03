@@ -45,25 +45,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // ── Foundation dates (numerology) ──
-    // Curated founding/inception dates take priority. Any symbol not listed here
-    // is resolved live from the data provider's listing (IPO) date and cached, so
-    // every searched ticker shows its OWN date — never a stale leftover.
+    // ── Listing (IPO) dates (numerology) ──
+    // The instrument's market birthday — the day it began trading. ETFs use their
+    // inception/first-trade date; stocks use their IPO date. Curated values take
+    // priority; any symbol not listed here is resolved live from the data
+    // provider's IPO date and cached, so every searched ticker shows its OWN
+    // listing date on the same basis — never a stale leftover, never a mixed basis.
     const FOUNDATION_DATES = {
         "SPY": "1993-01-22",
         "QQQ": "1999-03-10",
         "DIA": "1998-01-14",
-        "NVDA": "1993-04-05",
-        "AAPL": "1976-04-01",
-        "TSLA": "2003-07-01",
-        "MSFT": "1975-04-04",
-        "AMD": "1969-05-01",
-        "INTC": "1968-07-18",
-        "GOOGL": "1998-09-04",
-        "GOOG": "1998-09-04",
-        "AMZN": "1994-07-05",
-        "META": "2004-02-04",
-        "NFLX": "1997-08-29"
+        "NVDA": "1999-01-22",
+        "AAPL": "1980-12-12",
+        "TSLA": "2010-06-29",
+        "MSFT": "1986-03-13",
+        "AMD": "1972-09-27",
+        "INTC": "1971-10-13",
+        "GOOGL": "2004-08-19",
+        "GOOG": "2004-08-19",
+        "AMZN": "1997-05-15",
+        "META": "2012-05-18",
+        "NFLX": "2002-05-23"
     };
 
     const INDEX_SYMBOLS = ["SPY", "QQQ", "DIA"];
@@ -185,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="grid-row grid-row-3">
                 <div class="card card-ud"><div class="card-title">Universal Day</div><div class="card-value">${data.ud.value}<span class="card-number">/${data.ud.reduced}</span></div><div class="card-chain">Universal Year ${data.ud.universalYear}</div></div>
                 <div class="card card-pd"><div class="card-title">${data.symbolFoundation.symbol} Cycle Day</div><div class="card-value">${data.symbolCycle.value}<span class="card-number">/${data.symbolCycle.reduced}</span></div><div class="card-chain">Symbol session cycle</div></div>
-                <div class="card instr-current"><div class="card-title">${data.symbolFoundation.symbol} Foundation</div><div class="card-value">${data.symbolFoundation.value}<span class="card-number">/${data.symbolFoundation.reduced}</span></div><div class="card-chain">${data.symbolFoundation.date}</div></div>
+                <div class="card instr-current"><div class="card-title">${data.symbolFoundation.symbol} Listing</div><div class="card-value">${data.symbolFoundation.value}<span class="card-number">/${data.symbolFoundation.reduced}</span></div><div class="card-chain">${data.symbolFoundation.date}</div></div>
             </div>
             <div class="grid-row grid-row-2">
                 <div class="card compat-card"><div class="card-title">Market Cycle Alignment</div><div class="compat-text">${data.compatibility.universal}</div></div>
@@ -209,11 +211,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (verdict && verdict.v && window.InvictusVerdicts) {
             const meta = window.InvictusVerdicts.meta(verdict.v);
             signalItem.textContent = meta.sym;
-            signalIntItem.textContent = meta.tag + " — " + meta.note;
+            const prefix = data.signalScope === "market" ? "Broad-market backdrop (SPY): " : "";
+            signalIntItem.textContent = prefix + meta.tag + " — " + meta.note;
             parent.classList.add(meta.cls);
         } else {
             signalItem.textContent = "—";
-            signalIntItem.textContent = "Cycle bias is modeled for SPY, QQQ and DIA.";
+            signalIntItem.textContent = "Cycle bias unavailable for this date.";
         }
     }
 
@@ -266,17 +269,28 @@ document.addEventListener("DOMContentLoaded", () => {
             const cycleValue = hasFoundation ? symCycle.compound : "—";
             const cycleReduced = hasFoundation ? symCycle.reduced : "—";
             const cycleDisplay = hasFoundation ? symCycle.display : "—";
+            // Cycle Bias is calibrated per index (SPY/QQQ/DIA). For any other
+            // ticker we fall back to the broad-market (SPY) read for that date so
+            // the card always carries a real, date-varying bias instead of a dead
+            // placeholder — clearly labelled as the market backdrop, not a
+            // symbol-specific stat.
+            let signal = getVerdict(symbol, date);
+            let signalScope = "symbol";
+            if (!signal) {
+                const backdrop = getVerdict("SPY", date);
+                if (backdrop) { signal = backdrop; signalScope = "market"; }
+            }
             currentCalculations = {
                 ud: { value: ud.compound, reduced: ud.reduced, display: ud.display, universalYear: daily.universal.year.display, universalMonth: daily.universal.month.display, interpretation: universalEnergy.spec },
                 symbolCycle: { value: cycleValue, reduced: cycleReduced, display: cycleDisplay, interpretation: symbolEnergy.spec },
                 symbolFoundation: { symbol, value: foundationValue, reduced: foundationReduced, date: hasFoundation ? foundationDate : "Listing date unavailable" },
                 compatibility: {
-                    universal: hasFoundation ? `${symbol} foundation ${foundationDisplay} vs Universal Day ${ud.display} — ${ud.reduced === inst.reduced ? "aligned" : "not aligned"}` : `No foundation date on file for ${symbol}.`,
-                    cycle: hasFoundation ? `${symbol} foundation ${foundationDisplay} vs ${symbol} cycle day ${cycleDisplay} — ${symCycle.reduced === inst.reduced ? "aligned" : "not aligned"}` : `Cycle alignment needs a foundation date.`
+                    universal: hasFoundation ? `${symbol} listing ${foundationDisplay} vs Universal Day ${ud.display} — ${ud.reduced === inst.reduced ? "aligned" : "not aligned"}` : `No listing date on file for ${symbol}.`,
+                    cycle: hasFoundation ? `${symbol} listing ${foundationDisplay} vs ${symbol} cycle day ${cycleDisplay} — ${symCycle.reduced === inst.reduced ? "aligned" : "not aligned"}` : `Cycle alignment needs a listing date.`
                 },
                 universalEnergy, symbolEnergy,
-                guardrail: { type: alignment ? "aligned" : "neutral", message: !hasFoundation ? `No foundation date on file for ${symbol}; lean on price/VWAP.` : (alignment ? `${symbol} is numerologically aligned today. Still require chart confirmation.` : `${symbol} has no direct cycle alignment today. Let price/VWAP confirm.`), marketBias: alignment ? "heightened attention" : "neutral/planning" },
-                signal: getVerdict(symbol, date)
+                guardrail: { type: alignment ? "aligned" : "neutral", message: !hasFoundation ? `No listing date on file for ${symbol}; lean on price/VWAP.` : (alignment ? `${symbol} is numerologically aligned today. Still require chart confirmation.` : `${symbol} has no direct cycle alignment today. Let price/VWAP confirm.`), marketBias: alignment ? "heightened attention" : "neutral/planning" },
+                signal, signalScope
             };
             renderNumerologyDashboard(currentCalculations);
             updateChartBanner();
