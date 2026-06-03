@@ -381,20 +381,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function tradingViewEmbedUrl(symbol) {
         const cfg = getInterval();
-        const config = {
+        const isMobile = (typeof window !== "undefined" && window.innerWidth <= 768);
+        // The legacy widgetembed honors query-param flags (e.g. hidesidetoolbar),
+        // NOT the JSON-hash equivalents — so the chart is configured via query string.
+        const studies = isMobile ? ["STD;VWAP", "STD;EMA"] : ["STD;Volume", "STD;VWAP", "STD;EMA"];
+        const params = {
+            frameElementId: "tradingview-advanced-chart",
             symbol: toTradingViewSymbol(symbol),
             interval: cfg.tv,
-            hide_side_toolbar: "0",
-            allow_symbol_change: "1",
-            save_image: "1",
-            details: "1",
+            hidesidetoolbar: isMobile ? "1" : "0",
+            hidetoptoolbar: "0",
+            hide_side_toolbar: isMobile ? "1" : "0",
+            hide_legend: isMobile ? "1" : "0",
+            symboledit: "1",
+            saveimage: isMobile ? "0" : "1",
+            details: isMobile ? "0" : "1",
+            hideideas: "1",
             theme: "dark",
             style: "1",
             timezone: "America/Chicago",
-            withdateranges: "1",
-            studies: ["STD;Volume", "STD;VWAP", "STD;EMA", "STD;Relative_Strength_Index"]
+            withdateranges: isMobile ? "0" : "1",
+            studies: JSON.stringify(studies),
+            locale: "en"
         };
-        return `https://s.tradingview.com/widgetembed/?hideideas=1&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en#${encodeURIComponent(JSON.stringify(config))}`;
+        const qs = Object.keys(params)
+            .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+            .join("&");
+        return `https://s.tradingview.com/widgetembed/?${qs}`;
     }
 
     function renderTradingViewWidget(symbol) {
@@ -598,6 +611,18 @@ document.addEventListener("DOMContentLoaded", () => {
             refreshLive();
             refreshWatchlistData();
         }
+    });
+
+    // Re-render the chart only when crossing the mobile/desktop breakpoint
+    // (avoids reloading on mobile URL-bar scroll jitter).
+    let wasMobileChart = window.innerWidth <= 768;
+    let chartResizeTimer = null;
+    window.addEventListener("resize", () => {
+        const nowMobile = window.innerWidth <= 768;
+        if (nowMobile === wasMobileChart) return;
+        wasMobileChart = nowMobile;
+        clearTimeout(chartResizeTimer);
+        chartResizeTimer = setTimeout(() => renderTradingViewWidget(chartSymbol), 400);
     });
 
     // Verdicts load asynchronously (calendar.js) — refresh banner + bias card once ready.
