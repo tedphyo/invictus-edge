@@ -483,6 +483,10 @@ nav a.active { color: var(--brass-light); }
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
+  /* backdrop-filter creates a stacking context; lift it above the later
+     .dashboard cards so the absolute search dropdown isn't painted behind them. */
+  position: relative;
+  z-index: 30;
 }
 .dashboard-controls label {
   font-family: var(--mono);
@@ -552,6 +556,15 @@ nav a.active { color: var(--brass-light); }
 .search-result-item:last-child { border-bottom: none; }
 .search-result-item:hover { background: rgba(194, 163, 90, 0.14); color: #fff; }
 .search-result-item.dim { color: var(--faint); cursor: default; }
+.search-hint {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.6px;
+  color: var(--faint);
+  margin-top: 0.4rem;
+  line-height: 1.3;
+}
+.search-hint.pending { color: var(--brass-light); }
 
 .status-row {
   display: flex;

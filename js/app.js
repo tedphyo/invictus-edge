@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const datePicker = document.getElementById("date-picker");
     const symbolSearchInput = document.getElementById("symbol-search-input");
     const symbolSearchResults = document.getElementById("symbol-search-results");
+    const searchHint = document.getElementById("search-hint");
     const symbolSelect = document.getElementById("symbol-select");
     const currentSymbolDisplay = document.getElementById("current-symbol");
     const numerologyContainer = document.getElementById("numerology-container");
@@ -512,7 +513,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ── Symbol search (Finnhub) ──
+    const SEARCH_HINT_DEFAULT = "Type symbol, choose result or press Enter.";
+    // Keep the loaded symbol dominant: while the field holds text that hasn't
+    // been loaded yet, the hint reads "Pending search" so the typed value is
+    // never mistaken for the live symbol shown in Current Symbol / chart.
+    function updateSearchHint() {
+        if (!searchHint) return;
+        const typed = symbolSearchInput.value.trim().toUpperCase();
+        if (typed && typed !== String(selectedSymbol).toUpperCase()) {
+            searchHint.textContent = "Pending search — press Enter or pick a result.";
+            searchHint.classList.add("pending");
+        } else {
+            searchHint.textContent = SEARCH_HINT_DEFAULT;
+            searchHint.classList.remove("pending");
+        }
+    }
+
     async function handleSearchInput() {
+        updateSearchHint();
         const query = symbolSearchInput.value.trim();
         symbolSearchResults.innerHTML = "";
         if (query.length < 2) { symbolSearchResults.style.display = "none"; return; }
@@ -612,6 +630,7 @@ document.addEventListener("DOMContentLoaded", () => {
         symbolSearchInput.value = "";
         symbolSearchResults.innerHTML = "";
         symbolSearchResults.style.display = "none";
+        updateSearchHint();
         let optionExists = false;
         for (let i = 0; i < symbolSelect.options.length; i++) {
             if (symbolSelect.options[i].value === symbol) { symbolSelect.value = symbol; optionExists = true; break; }
